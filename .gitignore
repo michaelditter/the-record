@@ -1,0 +1,7 @@
+node_modules/
+*.log
+# never commit secret keys
+*.key
+the-record-key.txt
+.the-record/
+.DS_Store

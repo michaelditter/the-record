@@ -1,0 +1,67 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>The Record — put it on the record, permanently</title>
+<meta name="description" content="Sign a public record in your own name and broadcast it to the open Nostr network. No platform can recall it. The recording method from You Cannot Eat Code, made real.">
+<meta property="og:title" content="The Record">
+<meta property="og:description" content="Put it on the record. Permanently. In your name. On a network no one owns.">
+<link rel="icon" href='data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32"><rect width="32" height="32" fill="%2314171F"/><rect x="10" y="10" width="12" height="12" transform="rotate(45 16 16)" fill="%23C6A77A"/></svg>'>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;1,600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div class="frame" aria-hidden="true"></div>
+<main class="wrap">
+  <header>
+    <p class="kicker">The Record</p>
+    <h1>Put it on the record.</h1>
+    <p class="tagline">Permanently. In your name. On a network no one owns.</p>
+  </header>
+
+  <section class="panel">
+    <label class="fld" for="text">Your record — in your own words</label>
+    <textarea id="text" maxlength="800" placeholder="e.g. The town voted 4–1 to keep the green a commons. — recorded by [you], [date]"></textarea>
+    <div class="count"><span id="count">0</span> / 800</div>
+
+    <div class="btn-row">
+      <button class="btn" id="publish" type="button">Sign &amp; publish</button>
+      <span class="signer" id="signer-status"></span>
+    </div>
+    <div class="idbar" id="idbar"></div>
+
+    <p class="note-warn">
+      A record here is <b>public and cannot be recalled</b> — that is the point, not a bug.
+      Don't post anything private or anything you'd regret carving in stone.
+      Your identity is a secret key on this device; <b>back it up</b> — anyone who has it can post as you,
+      and losing it means losing the name. A record is <b>durable, not eternal</b>: it lives as long as one
+      relay keeps a copy, and you can <a href="https://github.com/michaelditter/the-record/blob/main/RELAY.md">run that relay</a>.
+    </p>
+  </section>
+
+  <section class="result" id="result" aria-live="polite">
+    <h2 id="result-title">On the record.</h2>
+    <div class="relays" id="relays"></div>
+    <div class="link-box">
+      <a id="verify-link" href="#" target="_blank" rel="noopener"></a>
+      <button class="btn btn-ghost" id="copy-link" type="button" style="padding:.4em 1em;font-size:.66rem">Copy link</button>
+    </div>
+    <div class="qr" id="qr" hidden></div>
+    <div class="keyout" id="keyout" hidden></div>
+  </section>
+
+  <footer>
+    <p><a href="https://github.com/michaelditter/the-record">Open source on GitHub</a> ·
+       built for <a href="https://youcannoteat.codes">You Cannot Eat Code</a></p>
+    <p>The recording method, made real. Print → Nostr. The signature is the byline.</p>
+  </footer>
+</main>
+
+<script src="https://unpkg.com/nostr-tools/lib/nostr.bundle.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/qrcode-generator@1.4.4/qrcode.min.js"></script>
+<script src="record.js"></script>
+</body>
+</html>

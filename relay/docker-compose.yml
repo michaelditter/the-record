@@ -1,0 +1,18 @@
+# The Record — your own Nostr relay (nostr-rs-relay).
+# Lightweight (Rust, LMDB-free SQLite), runs on a ~$5 VPS or a Raspberry Pi.
+#   docker compose up -d
+# Local test: connect a client to ws://localhost:8080
+# Production: keep it bound to localhost and put Caddy in front for TLS (see Caddyfile).
+services:
+  relay:
+    image: scsibug/nostr-rs-relay:latest
+    container_name: the-record-relay
+    restart: unless-stopped
+    ports:
+      - "8080:8080"            # for a public VPS behind Caddy, change to "127.0.0.1:8080:8080"
+    volumes:
+      - ./config.toml:/usr/src/app/config.toml:ro
+      - relay-data:/usr/src/app/db
+    user: "1000:1000"
+volumes:
+  relay-data:

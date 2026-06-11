@@ -1,0 +1,34 @@
+# nostr-rs-relay configuration — a civic record relay you own.
+# Full reference: https://github.com/scsibug/nostr-rs-relay/blob/master/config.toml
+
+[info]
+# Change these to your town / your name.
+relay_url = "wss://relay.yourtown.org/"
+name = "Your Town Record"
+description = "A civic record relay — signed notes, kept by the people who use it. The recording method, made real."
+# contact = "mailto:clerk@yourtown.org"
+# pubkey = ""   # optional: your npub as hex, marks you as the relay's keeper
+
+[database]
+data_directory = "/usr/src/app/db"
+
+[network]
+address = "0.0.0.0"
+port = 8080
+
+[options]
+# Reject notes timestamped too far in the future (anti-spam).
+reject_future_seconds = 1800
+
+[limits]
+# Sane starting limits for a small town relay. Raise if you need to.
+messages_per_sec = 5
+subscriptions_per_min = 60
+max_event_bytes = 131072
+max_ws_message_bytes = 131072
+max_ws_frame_bytes = 131072
+# Keep disk in check: cap how much one author can store, etc., as you grow.
+
+# To make this a PRIVATE town relay (only your town's keys may write), use the
+# [authorization] section with `pubkey_whitelist`. Left open here so anyone can
+# post to your town's record — that is the commons default. See the reference.

@@ -1,0 +1,9 @@
+# Caddy gives your relay automatic HTTPS (and the wss:// upgrade) with zero config.
+# 1. Point relay.yourtown.org's DNS A record at your server's IP.
+# 2. Put this next to your docker-compose, run Caddy (or add it as a service).
+# 3. Your relay is live at wss://relay.yourtown.org
+#
+# Replace the domain with yours. Caddy fetches and renews the TLS cert automatically.
+relay.yourtown.org {
+	reverse_proxy 127.0.0.1:8080
+}
