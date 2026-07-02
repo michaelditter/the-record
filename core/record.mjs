@@ -7,9 +7,27 @@
 // Spec: github.com/michaelditter/civic-record-protocol
 // ============================================================
 import * as NostrTools from 'nostr-tools';
-import {
-  CRP, buildRecord, signRecord, publishRecord as publishToRelays, recordLinks
-} from '@youcannoteat/record-core';
+import * as recordCore from '@youcannoteat/record-core';
+const {
+  CRP, buildRecord, signRecord, publishRecord: publishToRelays, recordLinks
+} = recordCore;
+
+// Re-export the OpenTimestamps anchoring helpers so the CLI and web app have a
+// single import source (the adapter), same as sign/publish/verify. These come
+// from record-core. Bind through the namespace (not a named import) so an older
+// installed record-core that predates them does not crash this module at load
+// time — every other command keeps working. After record-core is pushed with
+// anchorEventId/verifyAnchor, run `npm install` here to pick them up (the
+// dependency is pinned to github). Until then these throw a clear hint when
+// actually called, and the CLI treats that as "anchoring unavailable".
+const ANCHOR_UNAVAILABLE =
+  'Time anchoring is unavailable: update @youcannoteat/record-core (npm install), then try again.';
+export const anchorEventId = typeof recordCore.anchorEventId === 'function'
+  ? recordCore.anchorEventId
+  : async () => { throw new Error(ANCHOR_UNAVAILABLE); };
+export const verifyAnchor = typeof recordCore.verifyAnchor === 'function'
+  ? recordCore.verifyAnchor
+  : async () => { throw new Error(ANCHOR_UNAVAILABLE); };
 
 const { generateSecretKey, getPublicKey, nip19 } = NostrTools;
 

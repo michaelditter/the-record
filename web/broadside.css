@@ -1,0 +1,157 @@
+/* The Broadside — letterpress print-to-PDF of a record.
+   Screen: a full-viewport overlay showing the broadside plus action buttons.
+   Print: hide all app chrome, show only the broadside, A-series friendly. */
+
+#broadside-root[hidden] { display: none; }
+#broadside-root {
+  position: fixed; inset: 0; z-index: 50;
+  overflow: auto; background: var(--navy-deep);
+  padding: clamp(1rem, 4vw, 2.5rem);
+  display: flex; flex-direction: column; align-items: center; gap: 1.25rem;
+}
+
+.broadside-actions {
+  display: flex; gap: .75rem; flex-wrap: wrap;
+  justify-content: center; width: 100%;
+  position: sticky; top: 0; z-index: 2;
+  padding: .25rem 0;
+}
+
+/* The sheet. Aspect kept portrait; on screen it is capped to a readable width. */
+.broadside {
+  width: 100%; max-width: 46rem;
+  background: var(--parch);
+  color: var(--navy-deep);
+  border: 1px solid var(--brass-deep);
+  box-shadow: 0 24px 60px rgba(0, 0, 0, .55);
+}
+
+/* Broadside keyline frame — the family broadside look, square corners. */
+.bs-keyline {
+  border: 2px solid var(--navy-deep);
+  outline: 1px solid var(--navy-deep);
+  outline-offset: 5px;
+  margin: 14px;
+  padding: clamp(1.4rem, 4vw, 2.6rem);
+  min-height: 60vh;
+  display: flex; flex-direction: column;
+}
+
+.bs-head { text-align: center; }
+.bs-kicker {
+  font-family: var(--mono);
+  font-size: .82rem; letter-spacing: .42em; text-transform: uppercase;
+  color: var(--oxblood); margin: 0 0 .8rem;
+}
+.bs-rule { height: 0; border-top: 2px solid var(--navy-deep); }
+.bs-head .bs-rule { border-top-width: 3px; }
+
+.bs-body {
+  flex: 1 1 auto;
+  display: flex; align-items: center; justify-content: center;
+  padding: clamp(1.4rem, 5vw, 3rem) 0;
+}
+.bs-content {
+  font-family: var(--disp);
+  font-weight: 700;
+  color: var(--navy-deep);
+  line-height: 1.28;
+  margin: 0;
+  text-align: center;
+  white-space: pre-wrap; word-break: break-word;
+}
+/* Type scales inversely with record length so one page stays one page. */
+.broadside.sz-l .bs-content { font-size: clamp(1.7rem, 5.4vw, 2.7rem); }
+.broadside.sz-m .bs-content { font-size: clamp(1.4rem, 4.2vw, 2.1rem); }
+.broadside.sz-s .bs-content { font-size: clamp(1.15rem, 3.2vw, 1.6rem); line-height: 1.32; }
+
+.bs-foot {
+  display: flex; gap: clamp(1rem, 4vw, 2rem);
+  align-items: flex-start;
+  border-top: 1px solid var(--navy-deep);
+  padding-top: 1.2rem; margin-top: .5rem;
+}
+.bs-qr {
+  flex: 0 0 auto;
+  background: #fff;
+  padding: 8px;
+  border: 1px solid var(--navy-deep);
+  line-height: 0;
+}
+.bs-qr img { display: block; width: clamp(96px, 20vw, 132px); height: auto; image-rendering: pixelated; }
+
+.bs-meta { flex: 1 1 auto; font-family: var(--mono); min-width: 0; }
+.bs-date {
+  font-size: .92rem; font-weight: 500; letter-spacing: .06em;
+  color: var(--navy-deep); margin: 0 0 .5rem;
+}
+.bs-signer { font-size: .8rem; color: var(--navy-deep); margin: 0 0 .35rem; }
+.bs-npub {
+  font-weight: 500; letter-spacing: .04em;
+  color: var(--oxblood); word-break: break-all;
+}
+.bs-nevent {
+  font-size: .62rem; color: color-mix(in srgb, var(--navy-deep) 62%, transparent);
+  margin: 0 0 .6rem; word-break: break-all; line-height: 1.5;
+}
+.bs-caption {
+  font-size: .72rem; line-height: 1.6;
+  color: color-mix(in srgb, var(--navy-deep) 82%, transparent);
+  margin: 0; max-width: 42ch;
+}
+
+.bs-wordmark { text-align: center; margin-top: 1.4rem; }
+.bs-wordmark .bs-rule { margin-bottom: .7rem; }
+.bs-wordmark p {
+  font-family: var(--mono);
+  font-size: .78rem; letter-spacing: .3em; text-transform: lowercase;
+  color: var(--navy-deep); margin: 0;
+}
+
+/* ---- Print: a clean single-page broadside ------------------------- */
+@media print {
+  /* Neutral page; hide everything but the broadside. */
+  :root { background: #fff; }
+  body {
+    background: #fff !important;
+    background-image: none !important;
+    margin: 0;
+  }
+  body > *:not(#broadside-root) { display: none !important; }
+  .frame { display: none !important; }
+
+  /* When the broadside is open it takes the whole (single) page. If it is not
+     open, #broadside-root stays [hidden] and nothing prints from it. */
+  #broadside-root {
+    position: static; inset: auto;
+    display: block; padding: 0; margin: 0;
+    background: #fff; overflow: visible;
+  }
+  #broadside-root[hidden] { display: none !important; }
+  [data-print-hide] { display: none !important; }
+
+  .broadside {
+    max-width: none; width: auto;
+    border: none; box-shadow: none;
+    background: #fff;
+    color: #000;
+    /* Fit within one printed page. */
+    page-break-inside: avoid; break-inside: avoid;
+  }
+  .bs-keyline {
+    border-color: #000; outline-color: #000;
+    margin: 0; min-height: 0;
+    /* Fill most of the page height for the broadside feel. */
+    min-height: 92vh;
+  }
+  .bs-content, .bs-date, .bs-signer, .bs-caption, .bs-wordmark p { color: #000; }
+  .bs-kicker, .bs-npub { color: #000; }
+  .bs-rule, .bs-head .bs-rule { border-top-color: #000; }
+  .bs-foot, .bs-qr { border-color: #000; }
+  .bs-nevent { color: #333; }
+  .bs-caption { color: #000; }
+
+  /* Ask the browser to print backgrounds/borders and use portrait A-series. */
+  * { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  @page { size: A4 portrait; margin: 12mm; }
+}

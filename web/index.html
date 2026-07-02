@@ -12,6 +12,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;1,600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="style.css">
+<link rel="stylesheet" href="broadside.css">
 </head>
 <body>
 <div class="frame" aria-hidden="true"></div>
@@ -50,6 +51,10 @@
       <button class="btn btn-ghost" id="copy-link" type="button" style="padding:.4em 1em;font-size:.66rem">Copy link</button>
     </div>
     <div class="qr" id="qr" hidden></div>
+    <div class="broadside-cta" id="broadside-cta" hidden>
+      <button class="btn btn-ghost" id="print-broadside" type="button">Print the broadside</button>
+      <span class="broadside-hint">The 1776 print layer: a photocopy with a QR still verifies if the network goes dark.</span>
+    </div>
     <div class="keyout" id="keyout" hidden></div>
   </section>
 
@@ -62,6 +67,7 @@
 
 <script src="vendor/nostr.bundle.js"></script>
 <script src="vendor/qrcode.min.js"></script>
+<script src="broadside.js"></script>
 <script src="record.js"></script>
 </body>
 </html>

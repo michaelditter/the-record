@@ -71,6 +71,9 @@ textarea:focus, input:focus { outline: 1px solid var(--brass); outline-offset: -
 .link-box a { font-family: var(--mono); font-size: .78rem; word-break: break-all; }
 .qr { background: var(--parch); padding: 10px; display: inline-block; margin-top: .5rem; }
 .qr img, .qr canvas, .qr table { display: block; }
+.broadside-cta { margin-top: 1.2rem; display: flex; gap: .75rem; flex-wrap: wrap; align-items: center; }
+.broadside-cta .broadside-hint { font-family: var(--mono); font-size: .68rem; color: var(--parch-deep); line-height: 1.6; max-width: 34ch; }
+
 .keyout { margin-top: 1rem; border: 1px solid var(--oxblood); background: color-mix(in srgb, var(--oxblood) 12%, transparent); padding: 1rem; font-family: var(--mono); font-size: .74rem; line-height: 1.7; }
 .keyout code { color: var(--brass-bright); word-break: break-all; user-select: all; }
 

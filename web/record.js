@@ -108,6 +108,16 @@
       try { const q = window.qrcode(0, 'M'); q.addData(link); q.make(); qr.innerHTML = q.createImgTag(4, 8); qr.hidden = false; }
       catch (e) { qr.hidden = true; }
     }
+    // The broadside: the 1776 print layer as a disaster-recovery copy. Offer it
+    // once a record exists (accepted or not — a signed record still verifies).
+    const cta = $('#broadside-cta');
+    if (cta && window.Broadside) {
+      const npub = NT.nip19.npubEncode(event.pubkey);
+      cta.hidden = false;
+      $('#print-broadside').onclick = () => window.Broadside.open({
+        content: event.content, npub, nevent, njump: link, createdAt: event.created_at
+      });
+    }
     $('#result').classList.add('on');
     $('#result').scrollIntoView({ behavior: 'smooth', block: 'start' });
   }

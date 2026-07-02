@@ -1,0 +1,11 @@
+{
+  "relays": [
+    "wss://relay.damus.io",
+    "wss://nos.lol",
+    "wss://relay.primal.net",
+    "wss://relay.nostr.band"
+  ],
+  "events": [
+    { "id": "0000000000000000000000000000000000000000000000000000000000000000", "author": "<optional hex pubkey of the signer>" }
+  ]
+}

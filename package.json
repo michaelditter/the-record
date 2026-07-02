@@ -3,18 +3,35 @@
   "version": "1.0.0",
   "description": "Put a signed, uncensorable public record on Nostr — the recording method from You Cannot Eat Code, made real.",
   "type": "module",
-  "bin": { "the-record": "cli/record.mjs" },
+  "bin": {
+    "the-record": "cli/record.mjs"
+  },
   "scripts": {
     "record": "node cli/record.mjs",
+    "watch": "node watch/steward.mjs",
     "web": "node web/serve.mjs"
   },
-  "engines": { "node": ">=18" },
+  "engines": {
+    "node": ">=18"
+  },
   "dependencies": {
     "@youcannoteat/record-core": "github:michaelditter/record-core",
     "nostr-tools": "2.23.5"
   },
-  "keywords": ["nostr", "civic", "record", "uncensorable", "youcannoteat"],
+  "optionalDependencies": {
+    "opentimestamps": "^0.4.9"
+  },
+  "keywords": [
+    "nostr",
+    "civic",
+    "record",
+    "uncensorable",
+    "youcannoteat"
+  ],
   "author": "Michael Ditter",
   "license": "MIT",
-  "repository": { "type": "git", "url": "https://github.com/michaelditter/the-record" }
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/michaelditter/the-record"
+  }
 }

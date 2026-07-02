@@ -65,11 +65,37 @@ Every record is tagged `#therecord` and `#youcannoteat` — search those on any 
 - **Durable, not eternal.** A record lives as long as *one* relay keeps a copy. Publishing to several makes it resilient — and you can be one of those relays ([RELAY.md](RELAY.md)).
 - **Relays change.** The default relay list is in `core/record.mjs`; if one stops accepting writes, swap it (check status at [nostr.watch](https://nostr.watch)).
 
+## Steward's Watch — keep the redundancy honest
+
+A record is durable because it is redundant: it lives on several independent relays, so no single operator can memory-hole it. **Steward's Watch** turns that from a hope into a live guarantee. Give it a manifest of record ids and it asks *every* relay, one at a time, whether it still holds each record. It reports coverage (this record is on 3 of 5 relays), and when a relay has dropped a record it re-inscribes it: fetch the record from a relay that still has it, verify the signature with record-core, and re-broadcast it to the relays that lost it. A record that no relay still holds is reported loudly as at-risk. It is never fabricated.
+
+**Manifest** (`watch/example-manifest.json`) is JSON. Either a bare array of hex event ids, or an object with an optional relay list:
+```json
+{
+  "relays": ["wss://relay.damus.io", "wss://nos.lol"],
+  "events": [{ "id": "<64-char hex event id>", "author": "<hex pubkey, optional>" }]
+}
+```
+If you omit `relays`, the default relay set from record-core is used.
+
+**Two commands:**
+```bash
+node watch/steward.mjs watch/example-manifest.json                 # one-shot: check + heal
+node watch/steward.mjs watch/example-manifest.json --watch --interval=600   # loop every 600s
+```
+Add `--json` for a strict machine-readable report a site badge can consume:
+```json
+{ "checkedAt": "...", "events": [{ "id": "...", "present": [...], "missing": [...], "reinscribed": 2, "atRisk": false }] }
+```
+
+**Honest note:** this makes redundancy *checkable and self-healing*, not records eternal. Steward's Watch widens the margin by copying a record back onto relays that dropped it, but it cannot resurrect one that has fallen off every relay it knows about. A record lives only as long as one relay keeps a copy. Run your own relay ([RELAY.md](RELAY.md)) and you are one of those copies.
+
 ## Layout
 
 ```
 core/record.mjs   the shared sign-and-publish logic
 cli/record.mjs    the command-line tool
+watch/steward.mjs relay health monitor + auto re-inscription (Steward's Watch)
 web/              the no-install web app (Federal Brass)
 relay/            run your own relay (Docker + Caddy) — see RELAY.md
 site-patch/       make the book site's Nostr panel real — see site-patch/INTEGRATION.md
