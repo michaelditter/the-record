@@ -10,6 +10,7 @@
   },
   "engines": { "node": ">=18" },
   "dependencies": {
+    "@youcannoteat/record-core": "github:michaelditter/record-core",
     "nostr-tools": "2.23.5"
   },
   "keywords": ["nostr", "civic", "record", "uncensorable", "youcannoteat"],

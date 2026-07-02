@@ -1,32 +1,29 @@
 // ============================================================
 // The Record — core publish logic (Node / ESM).
-// Sign a kind-1 note and broadcast it to real Nostr relays.
-// The browser app (web/record.js) mirrors this against window.NostrTools.
+// Thin adapter over @youcannoteat/record-core (the Civic Record Protocol
+// reference implementation), so The Record and the rest of the tool family
+// share one signing/publishing/verifying core. A fix in record-core is a fix
+// here. The browser app (web/record.js) mirrors this against window.NostrTools.
+// Spec: github.com/michaelditter/civic-record-protocol
 // ============================================================
-import { finalizeEvent, generateSecretKey, getPublicKey } from 'nostr-tools/pure';
-import { SimplePool } from 'nostr-tools/pool';
-import * as nip19 from 'nostr-tools/nip19';
+import * as NostrTools from 'nostr-tools';
+import {
+  CRP, buildRecord, signRecord, publishRecord as publishToRelays, recordLinks
+} from '@youcannoteat/record-core';
+
+const { generateSecretKey, getPublicKey, nip19 } = NostrTools;
 
 // Free, public relays that accept anonymous writes (verify current status at nostr.watch).
-export const DEFAULT_RELAYS = [
-  'wss://relay.damus.io',
-  'wss://nos.lol',
-  'wss://relay.primal.net',
-  'wss://relay.nostr.band'
-];
+export const DEFAULT_RELAYS = [...CRP.DEFAULT_RELAYS];
 
-// Tags make every record discoverable: search #therecord / #youcannoteat on any Nostr client.
+// The tags every record carries. record-core adds ['client','the-record'],
+// ['t','youcannoteat'], and ['t','civic-record']; we also keep the legacy
+// ['t','therecord'] hashtag so existing searches keep working.
 export const DEFAULT_TAGS = [
   ['t', 'therecord'],
   ['t', 'youcannoteat'],
   ['client', 'the-record']
 ];
-
-const withTimeout = (p, ms, relay) =>
-  Promise.race([
-    Promise.resolve(p).then(() => ({ relay, ok: true, error: null })),
-    new Promise((res) => setTimeout(() => res({ relay, ok: false, error: 'timeout' }), ms))
-  ]).catch((e) => ({ relay, ok: false, error: String((e && e.message) || e) }));
 
 /**
  * publishRecord({ text, sk?, relays?, extraTags? })
@@ -40,35 +37,26 @@ export async function publishRecord({ text, sk, relays = DEFAULT_RELAYS, extraTa
   if (!sk) { sk = generateSecretKey(); generated = true; }
   const pk = getPublicKey(sk);
 
-  const event = finalizeEvent(
-    {
-      kind: 1,
-      created_at: Math.floor(Date.now() / 1000),
-      tags: [...DEFAULT_TAGS, ...extraTags],
-      content: String(text).trim()
-    },
-    sk
-  );
-
-  const pool = new SimplePool();
-  const perRelay = await Promise.all(
-    pool.publish(relays, event).map((p, i) => withTimeout(p, 8000, relays[i]))
-  );
-  try { pool.close(relays); } catch (e) { /* ignore */ }
-
-  const accepted = perRelay.filter((r) => r.ok).length;
-  const nevent = nip19.neventEncode({ id: event.id, relays: relays.slice(0, 2), author: pk });
+  // Build via record-core (CRP tags), keeping the legacy 'therecord' hashtag for continuity.
+  const template = buildRecord({
+    content: String(text).trim(),
+    client: 'the-record',
+    extraTags: [['t', 'therecord'], ...extraTags]
+  });
+  const event = signRecord(template, sk, NostrTools);
+  const links = recordLinks(event, NostrTools, relays);
+  const report = await publishToRelays(event, relays, NostrTools);
 
   return {
     id: event.id,
     pubkey: pk,
     npub: nip19.npubEncode(pk),
     note1: nip19.noteEncode(event.id),
-    nevent,
-    link: `https://njump.me/${nevent}`,
-    accepted,
-    total: relays.length,
-    perRelay,
+    nevent: links.nevent,
+    link: links.njump,
+    accepted: report.accepted,
+    total: report.total,
+    perRelay: report.per, // [{ relay, ok, error }]
     nsec: generated ? nip19.nsecEncode(sk) : null, // only surfaced when we generated it
     generated,
     event
