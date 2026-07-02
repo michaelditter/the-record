@@ -1,10 +1,10 @@
 # The Record
 
-**Put it on the record. Permanently. In your name. On a network no one owns.**
+**Put it on the record. In your name. On a network no one owns.**
 
 A tiny, real tool to publish a signed, uncensorable public record to [Nostr](https://nostr.com) — an open relay protocol. You sign a note with a key only you hold, and broadcast it to several independent relays. The signature is your byline. No platform can edit it, and no platform can take it back.
 
-This is the **recording method** from the book *[You Cannot Eat Code](https://youcannoteat.codes)* — made real. The book's first law: *keep a portable, attributed record of your judgment in a medium you control.* This is that, in about a hundred lines of code.
+This is the **recording method** from the book *[You Cannot Eat Code](https://youcannoteat.codes)* — made real. The book's first law: *keep a portable, attributed record of your judgment in a medium you control.* This is that: the shared sign-and-publish core is under 90 lines, and the whole tool (core + CLI + web app + site patch) is small enough to read in a sitting.
 
 > A pamphlet, once printed, belonged to everyone who held a copy. A signed note on an open relay protocol works the same way.
 
@@ -21,8 +21,8 @@ No accounts. No money. No tokens. Just a signature and the open network.
 ## Three ways to use it
 
 ### 1. The web app — no install
-Open the app, write your record, hit **Sign & publish**. You get a permanent link (and a QR) anyone can verify on any Nostr client.
-→ live at **[record.youcannoteat.codes](https://youcannoteat.codes)** · or run it locally: `npm run web` then open <http://127.0.0.1:4555>
+Open the app, write your record, hit **Sign & publish**. You get a link (and a QR) anyone can verify on any Nostr client.
+→ demo deploying at `record.youcannoteat.codes` (not live yet) · run it now from the [repo](https://github.com/michaelditter/the-record): `npm run web` then open <http://127.0.0.1:4555> (serves on localhost only)
 
 It signs three ways, safest first:
 1. **Your Nostr browser extension** (Alby, nos2x) — your key never touches the page.
@@ -30,6 +30,7 @@ It signs three ways, safest first:
 3. **Generate one** — shown once, with a clear "save this" step.
 
 ### 2. The CLI — scriptable
+Requires **Node 18+**. The web app above needs no install; the CLI does one `npm install` for its one dependency.
 ```bash
 npm install
 node cli/record.mjs "The town voted 4–1 to keep the green a commons. — recorded 2026-06-11"

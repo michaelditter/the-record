@@ -58,9 +58,15 @@ async function main() {
   if (args[0] === '--help' || args[0] === '-h') { console.log(USAGE); return; }
   if (args[0] === 'keypath') { console.log(KEY_FILE); return; }
   if (args[0] === 'whoami') {
-    const key = loadOrCreateKey();
-    if (key.fresh) console.log(`${C.y}New identity created.${C.x} Back it up: ${C.d}${KEY_FILE}${C.x}`);
-    console.log(npubEncode(getPublicKey(skFromNsec(key.nsec))));
+    // whoami must never mint an identity — only report an existing one.
+    const nsec = process.env.THE_RECORD_NSEC
+      ? process.env.THE_RECORD_NSEC.trim()
+      : (existsSync(KEY_FILE) ? readFileSync(KEY_FILE, 'utf8').trim() : null);
+    if (!nsec) {
+      console.log(`${C.y}No identity yet.${C.x} One is created the first time you record. Key path: ${C.d}${KEY_FILE}${C.x}`);
+      return;
+    }
+    console.log(npubEncode(getPublicKey(skFromNsec(nsec))));
     return;
   }
 

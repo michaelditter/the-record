@@ -5,3 +5,6 @@ node_modules/
 the-record-key.txt
 .the-record/
 .DS_Store
+
+# Claude Code harness config (local preview helper)
+.claude/

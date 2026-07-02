@@ -1,16 +1,29 @@
 # Make the site's Nostr panel real
 
+> **Where this applies.** These steps patch the **separate** promo-site repo
+> (`06_distribution/promo_site` in the *You Cannot Eat Code* book project), not
+> this repo. The files referenced below — `index.html`, `site.js`, `cards.js`,
+> and the page's `$()` / `esc()` helpers — live there, not in `the-record`. If
+> you cloned only `the-record`, copy `broadside.js` into that project to follow
+> along.
+
 The promo site (`06_distribution/promo_site`) ships the "broadside" panel as an
 honest **simulation** — `wireBroadcast()` fakes the signature and the relay
 accepts. This patch swaps in a **real** broadcast: a genuine signed note,
 published to real public relays, with a link to verify it. Three small steps.
 
 ### 1. Load the Nostr library
-In `index.html`, add this line just **before** `<script src="cards.js"></script>`:
+In `index.html`, add this line just **before** `<script src="cards.js"></script>`.
+Pin the version (matching this repo's `web/index.html`) so a CDN major-version
+bump can't silently break signing:
 
 ```html
-<script src="https://unpkg.com/nostr-tools/lib/nostr.bundle.js"></script>
+<script src="https://unpkg.com/nostr-tools@2.23.5/lib/nostr.bundle.js"></script>
 ```
+
+Better still, vendor the bundle: download it once to `assets/nostr.bundle.js`
+and load it relatively (`<script src="assets/nostr.bundle.js"></script>`), the
+same way `the-record`'s own web app does — no CDN dependency at runtime.
 
 ### 2. Replace the function
 In `site.js`, delete the existing `function wireBroadcast() { … }` (the block

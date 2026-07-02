@@ -9,7 +9,11 @@ services:
     container_name: the-record-relay
     restart: unless-stopped
     ports:
-      - "8080:8080"            # for a public VPS behind Caddy, change to "127.0.0.1:8080:8080"
+      # Bound to localhost by DEFAULT so `docker compose up -d` never exposes an
+      # unencrypted relay to the internet. Caddy (see Caddyfile) fronts it with TLS.
+      # For local-only testing this is all you need. Only widen to "8080:8080"
+      # if you deliberately want the raw ws:// port reachable from the network.
+      - "127.0.0.1:8080:8080"
     volumes:
       - ./config.toml:/usr/src/app/config.toml:ro
       - relay-data:/usr/src/app/db

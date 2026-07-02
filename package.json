@@ -6,11 +6,11 @@
   "bin": { "the-record": "cli/record.mjs" },
   "scripts": {
     "record": "node cli/record.mjs",
-    "web": "node -e \"import('node:http').then(({default:h})=>import('node:fs').then(({readFileSync,existsSync,statSync})=>{const M={'.html':'text/html','.js':'text/javascript','.css':'text/css'};h.createServer((q,s)=>{let p='web'+(q.url==='/'?'/index.html':q.url.split('?')[0]);if(existsSync(p)&&statSync(p).isFile()){s.setHeader('content-type',M[p.slice(p.lastIndexOf('.'))]||'text/plain');s.end(readFileSync(p));}else{s.statusCode=404;s.end('404');}}).listen(4555,()=>console.log('web app → http://127.0.0.1:4555'));}))\""
+    "web": "node web/serve.mjs"
   },
-  "engines": { "node": ">=22" },
+  "engines": { "node": ">=18" },
   "dependencies": {
-    "nostr-tools": "^2.7.0"
+    "nostr-tools": "2.23.5"
   },
   "keywords": ["nostr", "civic", "record", "uncensorable", "youcannoteat"],
   "author": "Michael Ditter",

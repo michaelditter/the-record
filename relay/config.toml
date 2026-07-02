@@ -2,8 +2,10 @@
 # Full reference: https://github.com/scsibug/nostr-rs-relay/blob/master/config.toml
 
 [info]
-# Change these to your town / your name.
-relay_url = "wss://relay.yourtown.org/"
+# Change these to your town / your name. relay_url MUST be your real public
+# wss:// URL — the CHANGE_ME below is intentionally invalid so a forgotten edit
+# fails loudly instead of advertising a bogus address to clients.
+relay_url = "wss://CHANGE_ME.example/"
 name = "Your Town Record"
 description = "A civic record relay — signed notes, kept by the people who use it. The recording method, made real."
 # contact = "mailto:clerk@yourtown.org"

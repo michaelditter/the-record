@@ -87,8 +87,20 @@
     $('#result-title').textContent = accepted > 0
       ? `On the record — live on ${accepted}/${per.length} relays.`
       : 'No relay accepted it — check your connection and try again.';
-    $('#relays').innerHTML = per.map((r) =>
-      `<div class="row"><span>${r.relay}</span><span class="${r.ok ? 'ok' : 'bad'}">${r.ok ? '✓ accepted' : '✗ ' + (r.error || 'failed')}</span></div>`).join('');
+    const relaysEl = $('#relays');
+    relaysEl.textContent = '';
+    per.forEach((r) => {
+      const row = document.createElement('div');
+      row.className = 'row';
+      const name = document.createElement('span');
+      name.textContent = r.relay;
+      const status = document.createElement('span');
+      status.className = r.ok ? 'ok' : 'bad';
+      status.textContent = r.ok ? '✓ accepted' : '✗ ' + (r.error || 'failed');
+      row.appendChild(name);
+      row.appendChild(status);
+      relaysEl.appendChild(row);
+    });
     const a = $('#verify-link'); a.href = link; a.textContent = link;
     $('#copy-link').onclick = () => navigator.clipboard.writeText(link);
     const qr = $('#qr');

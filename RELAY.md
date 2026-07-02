@@ -24,8 +24,9 @@ cd relay
 docker compose up -d
 docker compose logs -f       # watch it boot
 ```
-The relay is now listening on port **8080**. Test it locally by pointing any
-Nostr client (or this repo's CLI) at `ws://localhost:8080`:
+The relay is now listening on **127.0.0.1:8080** (localhost only, by default, so
+it is never exposed to the internet before you put TLS in front of it). Test it
+by pointing any Nostr client (or this repo's CLI) at `ws://localhost:8080`:
 ```bash
 THE_RECORD_RELAYS=ws://localhost:8080 node ../cli/record.mjs "first record on my own relay"
 ```
@@ -34,9 +35,14 @@ THE_RECORD_RELAYS=ws://localhost:8080 node ../cli/record.mjs "first record on my
 Relays must be served over `wss://` (TLS). [Caddy](https://caddyserver.com)
 does this automatically.
 
-1. Point `relay.yourtown.org`'s DNS **A record** at your server's IP.
-2. In `docker-compose.yml`, change the port binding to `"127.0.0.1:8080:8080"` so the relay is only reachable through Caddy.
-3. Install Caddy and use the provided [`relay/Caddyfile`](relay/Caddyfile) (edit the domain):
+1. Point `relay.yourtown.org`'s DNS **A record** at your server's IP, and wait
+   for it to propagate (`dig +short relay.yourtown.org` should return your IP)
+   **before** starting Caddy — Caddy needs working DNS to issue the TLS cert.
+2. The relay is already bound to `127.0.0.1:8080` by default (step 2 above), so
+   it is only reachable through Caddy. Nothing to change here.
+3. Open your firewall for HTTP/HTTPS so Caddy can complete the ACME challenge
+   and serve `wss://` (e.g. `sudo ufw allow 80,443/tcp`).
+4. Install Caddy and use the provided [`relay/Caddyfile`](relay/Caddyfile) (edit the domain):
    ```bash
    sudo apt install -y caddy          # or your platform's install
    sudo cp Caddyfile /etc/caddy/Caddyfile   # edit the domain first
@@ -61,6 +67,16 @@ in `config.toml` (see the
 - **Disk** grows with events — watch it; the limits in `config.toml` cap abuse.
 - **Spam** is real on open relays; the rate limits help, and a whitelist removes it entirely.
 - **Updates:** `docker compose pull && docker compose up -d` now and then.
+
+## First-boot gotchas
+- **Volume permissions.** The container runs as `user: 1000:1000` and writes its
+  database to a fresh named volume. If the first boot fails with a permission or
+  "unable to open database" error, the volume isn't owned by that UID. Fix it
+  with `docker compose run --rm --user root relay chown -R 1000:1000 /usr/src/app/db`,
+  or drop the `user:` line if your host maps differently.
+- **DNS before TLS.** Don't start Caddy until `dig +short relay.yourtown.org`
+  returns your server's IP, or the certificate request will fail.
+- **Firewall.** Ports 80 and 443 must be open for Caddy's ACME challenge.
 
 That's it. You're now part of the network that keeps your town's record — not
 just a renter of someone else's.
