@@ -1,0 +1,24 @@
+name: ci
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - name: install deps (if any)
+        run: if [ -f package.json ]; then npm install; fi
+      - name: syntax-check every tracked JS/MJS (excluding vendor)
+        run: |
+          files=$(git ls-files '*.js' '*.mjs' | grep -vE '(^|/)(vendor|node_modules)/' || true)
+          if [ -z "$files" ]; then echo "no JS files"; else echo "$files" | xargs -n1 node --check && echo "all syntax OK"; fi
+      - name: run tests if defined
+        run: npm test --if-present
