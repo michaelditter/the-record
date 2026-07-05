@@ -1,0 +1,118 @@
+/* The Town Seal — layers on top of style.css (Federal Brass). */
+
+.lede, .pub-lede {
+  font-family: var(--body); font-size: 1.02rem; color: var(--parch-deep);
+  line-height: 1.65; margin: 0 0 1.75rem; max-width: 60ch;
+}
+.lede b, .pub-lede b { color: var(--brass-bright); font-weight: 400; }
+
+/* tabs */
+.tabs { display: flex; gap: 0; border-bottom: 1.5px solid var(--rule); margin-bottom: 2rem; }
+.tab {
+  font-family: var(--mono); font-size: .74rem; letter-spacing: .16em; text-transform: uppercase;
+  padding: .85em 1.4em; cursor: pointer; color: var(--parch-deep);
+  background: transparent; border: 1.5px solid transparent; border-bottom: none; margin-bottom: -1.5px;
+  transition: color var(--ease) .18s, background var(--ease) .18s;
+}
+.tab:hover { color: var(--brass-bright); }
+.tab.on { color: var(--navy-deep); background: var(--brass); border-color: var(--brass); }
+.tab:focus-visible { outline: 1px solid var(--brass); outline-offset: 2px; }
+
+.pane { display: none; }
+.pane.on { display: block; }
+
+/* layout helpers */
+.grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+@media (max-width: 30rem) { .grid2 { grid-template-columns: 1fr; } }
+input[type=text] { margin: 0; }
+.hint { font-family: var(--mono); font-size: .7rem; color: var(--parch-deep); line-height: 1.6; margin: .8rem 0 0; }
+
+/* officer rows */
+.officer-row { display: grid; grid-template-columns: auto 1fr 1fr; gap: .75rem; align-items: center; margin-top: 1rem; }
+.officer-row .idx { font-family: var(--mono); font-size: .8rem; color: var(--brass); width: 1.5em; text-align: right; }
+@media (max-width: 34rem) {
+  .officer-row { grid-template-columns: 1fr; gap: .4rem; padding-top: .8rem; border-top: 1px solid var(--rule-faint); }
+  .officer-row .idx { text-align: left; }
+}
+#officers { margin-top: 1.5rem; }
+.officers-head { font-family: var(--mono); font-size: .72rem; letter-spacing: .2em; text-transform: uppercase; color: var(--brass); margin: 2rem 0 0; border-top: 1px solid var(--rule-faint); padding-top: 1.2rem; }
+
+.pub-title, .cards-head h2 { font-family: var(--disp); font-size: 1.5rem; color: var(--brass-bright); margin: 0 0 .8rem; }
+.publish-area, .cards-area { margin-top: 1.5rem; }
+.pub-preview {
+  font-family: var(--body); font-size: .96rem; line-height: 1.6; color: var(--parch);
+  border: 1px solid var(--rule-faint); border-left: 3px solid var(--brass);
+  background: var(--navy-deep); padding: 1rem 1.2rem; margin: 0 0 1.4rem;
+}
+.seal-npub {
+  font-family: var(--mono); font-size: .82rem; color: var(--brass-bright); word-break: break-all;
+  border: 1px solid var(--rule); background: var(--navy-deep); padding: .8rem 1rem; margin-bottom: 1rem;
+}
+.seal-npub .lbl { display: block; font-size: .66rem; letter-spacing: .2em; text-transform: uppercase; color: var(--brass); margin-bottom: .35em; }
+.seal-npub code { user-select: all; }
+
+/* cards */
+.cards-head p { font-family: var(--mono); font-size: .72rem; color: var(--parch-deep); line-height: 1.7; max-width: 62ch; margin: 0 0 1.2rem; }
+#cards { display: grid; gap: 1.25rem; }
+.card {
+  border: 1.5px solid var(--rule); background: var(--navy);
+  padding: 1.4rem 1.5rem; position: relative;
+}
+.card::before {
+  content: ""; position: absolute; inset: 6px; border: 1px solid var(--rule-faint); pointer-events: none;
+}
+.card .card-inner { position: relative; }
+.card .seal-mark {
+  font-family: var(--mono); font-size: .64rem; letter-spacing: .28em; text-transform: uppercase;
+  color: var(--brass); margin: 0 0 .4rem;
+}
+.card .officer-name { font-family: var(--disp); font-size: 1.35rem; color: var(--parch); margin: 0; }
+.card .officer-role { font-family: var(--body); font-style: italic; color: var(--parch-deep); margin: .1rem 0 1rem; }
+.card .card-town { font-family: var(--mono); font-size: .72rem; color: var(--brass-bright); margin: 0 0 1.1rem; letter-spacing: .06em; }
+.card .field-lbl { font-family: var(--mono); font-size: .64rem; letter-spacing: .2em; text-transform: uppercase; color: var(--brass); margin: 1rem 0 .3rem; }
+.card .share-val {
+  font-family: var(--mono); font-size: .82rem; color: var(--brass-bright); word-break: break-all;
+  background: var(--navy-deep); border: 1px solid var(--rule-faint); padding: .7rem .8rem; user-select: all; line-height: 1.5;
+}
+.card .npub-val { font-family: var(--mono); font-size: .74rem; color: var(--parch-deep); word-break: break-all; user-select: all; }
+.card .card-warn {
+  font-family: var(--mono); font-size: .68rem; color: var(--parch-deep); line-height: 1.65;
+  margin: 1.2rem 0 0; border-top: 1px solid var(--rule-faint); padding-top: .9rem;
+}
+.card .card-warn b { color: var(--oxblood); filter: brightness(1.55); font-weight: 400; }
+
+/* recovery output */
+.recover-out {
+  margin-top: 1.3rem; border: 1.5px solid var(--rule); background: var(--navy-deep); padding: 1.1rem 1.3rem;
+  font-family: var(--mono); font-size: .8rem; line-height: 1.7;
+}
+.recover-out .row { display: flex; flex-wrap: wrap; gap: .5rem; align-items: baseline; margin-bottom: .5rem; }
+.recover-out .k { color: var(--brass); letter-spacing: .12em; text-transform: uppercase; font-size: .66rem; min-width: 9em; }
+.recover-out .v { color: var(--brass-bright); word-break: break-all; user-select: all; }
+.recover-out.match { border-color: var(--verd); }
+.recover-out.mismatch { border-color: var(--oxblood); }
+.recover-out .verdict { font-size: .92rem; margin-top: .6rem; }
+.recover-out .verdict.ok { color: var(--verd); filter: brightness(1.35); }
+.recover-out .verdict.no { color: var(--oxblood); filter: brightness(1.55); }
+
+textarea#shares-in { min-height: 7em; font-family: var(--mono); font-size: .86rem; }
+
+/* print: one card per page, hide everything else */
+@media print {
+  .frame, header, .tabs, .lede, .panel, .publish-area, footer, .no-print,
+  #pane-recovery, .cards-head { display: none !important; }
+  body { background: #fff; color: #111; }
+  .wrap { max-width: none; padding: 0; }
+  .cards-area, .pane, .pane.on { display: block !important; }
+  #cards { display: block; gap: 0; }
+  .card {
+    page-break-after: always; break-after: page;
+    border: 2px solid #111; background: #fff; color: #111; margin: 0; padding: 2.5rem;
+    min-height: 92vh;
+  }
+  .card::before { border-color: #999; }
+  .card .seal-mark, .card .card-town, .card .field-lbl, .card .officer-name { color: #111; }
+  .card .officer-role, .card .npub-val, .card .card-warn { color: #333; }
+  .card .share-val { color: #111; background: #f4f0e8; border-color: #111; }
+  .card .card-warn b { color: #7C3A2D; filter: none; }
+}

@@ -1,0 +1,115 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Clerk Minutes — put your town's record on the open network</title>
+<meta name="description" content="A zero-account tool for a town clerk to sign approved minutes, an agenda, or a legal notice as a civic record and broadcast it to the open Nostr network. No vendor, no account, no recall. Independently verifiable by any citizen.">
+<meta property="og:title" content="Clerk Minutes">
+<meta property="og:description" content="Sign your town's minutes, agenda, or legal notice as a public civic record no platform can recall. Free, vendor-free, verifiable.">
+<link rel="icon" href='data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32"><rect width="32" height="32" fill="%2314171F"/><rect x="10" y="10" width="12" height="12" transform="rotate(45 16 16)" fill="%23C6A77A"/></svg>'>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;1,600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+<style>
+  /* Clerk Minutes — a few scoped helpers on top of the shared Federal Brass sheet. */
+  .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem 1.25rem; }
+  @media (max-width: 34rem) { .grid2 { grid-template-columns: 1fr; } }
+  .fld-row { display: flex; flex-direction: column; }
+  select {
+    width: 100%; font-family: var(--body); font-size: 1.05rem; color: var(--parch);
+    background: var(--navy-deep); border: 1px solid var(--rule); padding: .8em 1em;
+  }
+  select:focus { outline: 1px solid var(--brass); outline-offset: -1px; }
+  .type-row { display: flex; gap: .5rem; flex-wrap: wrap; margin: .2rem 0 1.25rem; }
+  .type-row .seg {
+    font-family: var(--mono); font-size: .74rem; letter-spacing: .12em; text-transform: uppercase;
+    padding: .6em 1.1em; cursor: pointer; color: var(--brass-bright);
+    background: transparent; border: 1px solid var(--rule);
+  }
+  .type-row .seg[aria-pressed="true"] { background: var(--brass); color: var(--navy-deep); border-color: var(--brass); }
+  .verify-raw { font-family: var(--mono); font-size: .74rem; color: var(--parch-deep); line-height: 1.8; margin-top: 1rem; display: grid; gap: .5rem; }
+  .verify-raw code { color: var(--brass-bright); word-break: break-all; user-select: all; }
+  .how-verify { font-family: var(--mono); font-size: .72rem; color: var(--parch-deep); line-height: 1.7; margin-top: 1.2rem; border-top: 1px solid var(--rule-faint); padding-top: 1rem; }
+  .how-verify b { color: var(--brass-bright); font-weight: 400; }
+</style>
+</head>
+<body>
+<div class="frame" aria-hidden="true"></div>
+<main class="wrap">
+  <header>
+    <p class="kicker">Clerk Minutes</p>
+    <h1>Put your town on the record.</h1>
+    <p class="tagline">Sign your minutes, agenda, or legal notice. No vendor. No account. No recall.</p>
+  </header>
+
+  <section class="panel">
+    <div class="grid2">
+      <div class="fld-row">
+        <label class="fld" for="town">Town</label>
+        <input type="text" id="town" placeholder="Goshen">
+      </div>
+      <div class="fld-row">
+        <label class="fld" for="state">State</label>
+        <input type="text" id="state" placeholder="CT">
+      </div>
+      <div class="fld-row">
+        <label class="fld" for="board">Board / body</label>
+        <input type="text" id="board" placeholder="Board of Selectmen">
+      </div>
+      <div class="fld-row">
+        <label class="fld" for="date">Meeting date</label>
+        <input type="text" id="date" placeholder="2026-07-05">
+      </div>
+    </div>
+
+    <label class="fld" style="margin-top:1.25rem">Record type</label>
+    <div class="type-row" id="type-row" role="group" aria-label="Record type">
+      <button class="seg" type="button" data-type="minutes" aria-pressed="true">Minutes</button>
+      <button class="seg" type="button" data-type="agenda" aria-pressed="false">Agenda</button>
+      <button class="seg" type="button" data-type="notice" aria-pressed="false">Notice</button>
+    </div>
+
+    <label class="fld" for="body-text">The approved text — paste it exactly as adopted</label>
+    <textarea id="body-text" placeholder="e.g. Minutes of the Regular Meeting of the Board of Selectmen, July 5, 2026. Present: … Motion by … carried 4–1. …"></textarea>
+    <div class="count"><span id="count">0</span> characters</div>
+
+    <div class="btn-row">
+      <button class="btn" id="sign" type="button">Sign &amp; record</button>
+      <span class="signer" id="signer-status"></span>
+    </div>
+    <div class="idbar" id="idbar"></div>
+
+    <p class="note-warn">
+      This signs your town's record with the <b>Town Seal</b> (a Nostr key) and broadcasts it to several
+      independent relays. It is <b>public and cannot be recalled</b>: that is the point. Sign only text your
+      body has <b>already approved</b>. The seal is a secret key. anyone who holds it can post as your town, so
+      guard it and back it up. A record is <b>durable, not eternal</b>: it lives as long as one relay keeps a
+      copy, and you can run that relay.
+    </p>
+  </section>
+
+  <section class="result" id="result" aria-live="polite">
+    <h2 id="result-title">On the record.</h2>
+    <div class="relays" id="relays"></div>
+    <div class="verify-raw" id="verify-raw" hidden></div>
+    <p class="how-verify" id="how-verify" hidden></p>
+    <div class="keyout" id="keyout" hidden></div>
+  </section>
+
+  <footer>
+    <p><a href="index.html">The Record</a> ·
+       <a href="https://github.com/michaelditter/the-record">Open source on GitHub</a> ·
+       built for <a href="https://youcannoteat.codes">You Cannot Eat Code</a></p>
+    <p>The legal-notice newspaper is dying. Your town's record does not have to.</p>
+  </footer>
+</main>
+
+<script src="vendor/nostr.bundle.js"></script>
+<!-- record-core (the shared Civic Record Protocol core) vendored from
+     github.com/michaelditter/record-core; exposed on window for minutes.js. -->
+<script type="module">import * as RecordCore from './vendor/record-core.mjs'; window.RecordCore = RecordCore;</script>
+<script src="minutes.js"></script>
+</body>
+</html>

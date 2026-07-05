@@ -49,6 +49,47 @@ A ~$5/month VPS (or a Raspberry Pi) is enough to host your town's relay, so your
 
 ---
 
+## Clerk Minutes — a town's record of itself
+
+The legal-notice newspaper is dying, and no civic tool gives a town an un-recallable, vendor-free record of its own proceedings. **Clerk Minutes** does, for free.
+
+Open `web/minutes.html` (same `npm run web`, then browse to `/minutes.html`). A town clerk enters the town, state, board or body (e.g. *Board of Selectmen*), and meeting date, picks a type (**Minutes / Agenda / Notice**), and pastes the text that was already approved. Hit **Sign & record**, and it is signed with the **Town Seal** (a Nostr key the clerk holds) and broadcast to several independent relays. No account, no vendor, no server keeps the draft.
+
+- **Town-scoped.** Every record carries `t=town-<state>-<name>` (e.g. `town-ct-goshen`), so a whole town's public record is one `#t` query away from any relay. The town, not the platform.
+- **Minutes are the record of record.** Long-form minutes are published as a kind-30023 replaceable, addressable document with a stable address `d = <board>-<date>-<type>` and title `"<Board> <Type>, <date>"`. Short agendas and notices under ~900 characters are published as a plain kind-1 civic record, typed `notice` or `minutes`.
+- **Two links, honestly labeled.** A kind-30023 record is **replaceable by its keyholder**: if the body later adopts a corrected set, re-recording with the same board/date/type replaces the address in place. So the tool shows both the **immutable `nevent`** (this exact signed version — *cite this for the official minutes of record*) **and the `naddr`** (the address, which always resolves to the latest correction).
+- **How a citizen verifies.** Open the verify link, or paste the `nevent` into any Nostr client (njump.me). The client checks the signature against the Town Seal's public key, so anyone can confirm the town signed this text and that not one character has changed. No account needed.
+
+**Signing, safest first** (mirrors The Charter): a **Nostr browser extension** if present (the seal never touches the page), else **paste the Town Seal's `nsec`** (stored only in this browser, never transmitted), else a seal is **generated and shown once** with a download/print step and a plain warning. Key material never leaves the device.
+
+---
+
+## The Town Seal — a municipal key with public succession
+
+Every clerk asks the same question the first time you hand them a key: *what happens when I retire, or lose my laptop?* A single private key is a single point of failure, and a town cannot bet its official record on one person's hard drive. **The Town Seal** answers it in the open.
+
+Open `web/seal.html` (same `npm run web`, then browse to `/seal.html`). It runs a **key ceremony** you can do at a public meeting, on a screen the room can see:
+
+1. **Name the town and the officers.** Enter town and state, the names and roles of *N* officers (default 5), and the threshold *k* (default 3).
+2. **Generate the key, in the room.** A fresh Nostr secret key is generated in the browser (`crypto.getRandomValues`). This is the one moment the whole key exists.
+3. **Split it with Shamir Secret Sharing.** The 32-byte secret is split into *N* shares over GF(256) using [`secrets.js-grempe`](https://github.com/grempe/secrets.js) (vendored, pinned to 2.0.0). The tool self-checks that *k* shares rebuild the exact key before it shows a single card.
+4. **Hand out the shares, once.** Each officer gets a **printable card** with their name, role, their one share, the town's public seal (npub), and a plain warning. A **Print all cards** button lays out one card per page. The shares are shown this once and are never stored.
+5. **Publish only the seal.** One signed **kind-30023** declaration goes to the relays: *"The town of Goshen, CT adopts this public seal on <date>. Records signed by this key are the town official record. The signing key is held 3-of-5 by named officers."* It carries the officers' **names and roles** and the **threshold** as tags, is town-scoped (`t=town-ct-goshen`), and is built and verified with the shared Civic Record Protocol core. It **never** carries a share or the secret. The key is signed with once, then dropped from memory.
+
+The result: the town's public identity is a single npub anyone can verify, and the private key that produces it is **never in one place again**. When the clerk retires, the town does not lose its seal. When a laptop dies, nothing is lost. When the town needs to sign, *k* officers meet and reconstruct the key.
+
+### Recover / practice
+
+The same page has a **Recover** tab. Paste any *k* shares and the town key is reconstructed **in the browser**, its npub derived and shown, and (if you paste the published seal npub) confirmed to match. Officers should rehearse this before they ever need it. Shares are combined only in page memory. They are never saved and never sent anywhere.
+
+### The honest security note
+
+Shamir Secret Sharing protects the town against **losing or compromising a single share**: a share below the threshold is worthless, so a lost card or one careless officer does not endanger the seal. It does **not** protect against **k officers colluding** — any *k* of them, gathered, *are* the town key. That is not a flaw; it is the whole design. You choose *k* and you choose the officers precisely to set how many honest people it takes to act, and how many dishonest ones it would take to defect. Choose *k* high enough that no faction can reach it alone, and low enough that the town can still assemble a quorum when a laptop dies. Reconstructing the key (in Recover, or to sign) reveals the full secret in that browser for a moment, so do it on a trusted device and reload when done. A seal is **durable, not eternal**: the declaration lives as long as one relay keeps a copy, and because a kind-30023 record is replaceable by its keyholder, cite the immutable `nevent` for the exact adopting version.
+
+**Key safety, enforced in code.** No secret key and no share is ever written to `localStorage` or sent over any network. The only thing that touches the wire is the signed, public declaration, which by construction contains neither. Round-trip correctness is proven by a Node harness (200 random splits, exact hex reconstruction across random *k*-of-*N* subsets, with *k−1* shares proven not to reconstruct).
+
+---
+
 ## How it works
 
 - **Your key is your byline.** A note is signed (BIP-340 / secp256k1). Anyone can verify the signature; only you can produce it.

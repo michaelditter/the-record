@@ -1,0 +1,162 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>The Town Seal: a municipal key with public succession</title>
+<meta name="description" content="A key-ceremony kit that turns a Nostr keypair into a town's public seal. Generated at a public meeting, split with Shamir Secret Sharing among named officers, and published so only the town npub is ever public. The secret is never in one place again.">
+<link rel="icon" href='data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32"><rect width="32" height="32" fill="%2314171F"/><circle cx="16" cy="16" r="9" fill="none" stroke="%23C6A77A" stroke-width="2"/><rect x="11" y="11" width="10" height="10" transform="rotate(45 16 16)" fill="%23C6A77A"/></svg>'>
+<!-- Fonts vendored locally (vendor/fonts/) so the page loads no third-party servers and works fully offline. -->
+<link rel="stylesheet" href="vendor/fonts/fonts.css">
+<link rel="stylesheet" href="style.css">
+<link rel="stylesheet" href="seal.css">
+</head>
+<body>
+<div class="frame" aria-hidden="true"></div>
+<main class="wrap">
+  <header>
+    <p class="kicker">The Town Seal</p>
+    <h1>A seal the town holds together.</h1>
+    <p class="tagline">Generate the town key at a public meeting. Split it among named officers. Publish only the seal. No one person can sign alone, and no retirement can lose the town its name.</p>
+  </header>
+
+  <nav class="tabs" role="tablist" aria-label="Town Seal modes">
+    <button class="tab on" id="tab-ceremony" role="tab" aria-selected="true" aria-controls="pane-ceremony" type="button">The ceremony</button>
+    <button class="tab" id="tab-recovery" role="tab" aria-selected="false" aria-controls="pane-recovery" type="button">Recover / practice</button>
+  </nav>
+
+  <!-- ============ CEREMONY ============ -->
+  <section class="pane on" id="pane-ceremony" role="tabpanel" aria-labelledby="tab-ceremony">
+    <p class="lede">
+      Every clerk asks the same question: what happens when I retire, or lose my laptop? A single
+      private key is a single point of failure. The Town Seal answers it in the open. You generate
+      the key once, in the room, split it into shares, and hand one to each officer. Any
+      <b id="lede-k">3</b> of <b id="lede-n">5</b> can reconstruct the key when the town needs to sign.
+      A lost share below that number is nothing. The whole key is never in one place again.
+    </p>
+
+    <div class="panel">
+      <div class="grid2">
+        <div>
+          <label class="fld" for="town-name">Town name</label>
+          <input type="text" id="town-name" placeholder="Goshen" autocomplete="off">
+        </div>
+        <div>
+          <label class="fld" for="town-state">State</label>
+          <input type="text" id="town-state" placeholder="CT" autocomplete="off">
+        </div>
+      </div>
+
+      <div class="grid2" style="margin-top:1rem">
+        <div>
+          <label class="fld" for="officer-count">Officers (N)</label>
+          <input type="text" inputmode="numeric" id="officer-count" value="5" autocomplete="off">
+        </div>
+        <div>
+          <label class="fld" for="threshold">Threshold to sign (k)</label>
+          <input type="text" inputmode="numeric" id="threshold" value="3" autocomplete="off">
+        </div>
+      </div>
+      <p class="hint" id="kn-hint">Any k of N shares reconstruct the town key. Choose k so no single officer can act alone, and no single loss can lock the town out. Default 3-of-5.</p>
+
+      <div id="officers"><!-- officer name/role rows injected by seal.js --></div>
+
+      <div class="btn-row">
+        <button class="btn" id="generate" type="button">Generate the town key &amp; split it</button>
+        <span class="signer" id="gen-status"></span>
+      </div>
+      <p class="note-warn">
+        Do this on a screen the room can see, on a device you trust. The secret key exists in this
+        page's memory for exactly one moment: while it is generated, split, and signed. It is
+        <b>never</b> saved to this device, and <b>never</b> sent over any network. Print the officer
+        cards before you leave the page. Reload and the whole key is gone, held only in the shares.
+      </p>
+    </div>
+
+    <!-- officer share cards (shown once) -->
+    <section class="cards-area" id="cards-area" hidden>
+      <div class="cards-head">
+        <h2>Officer share cards</h2>
+        <p>Each officer gets one card, and only this once. Print them, hand them out, and do not
+          keep a copy of anyone else's. Below-threshold loss is fine. Above-threshold gathering is
+          the town signing, and a breach if it is not the town.</p>
+        <div class="btn-row no-print">
+          <button class="btn" id="print-cards" type="button">Print all cards (one per page)</button>
+        </div>
+      </div>
+      <div id="cards"><!-- one .card per officer, injected --></div>
+    </section>
+
+    <!-- publish the seal declaration -->
+    <section class="panel publish-area" id="publish-area" hidden>
+      <h2 class="pub-title">Publish the Town Seal</h2>
+      <p class="pub-lede">
+        One signed declaration goes to the open network: the town adopts this public seal, and records
+        signed by this key are the town's official record. It carries the officers' names and roles and
+        the threshold, but <b>never a share and never the secret</b>. It is signed once with the key you
+        just generated, then the key is discarded from memory.
+      </p>
+      <div class="pub-preview" id="pub-preview"></div>
+      <div class="btn-row">
+        <button class="btn" id="publish" type="button">Sign &amp; publish the seal</button>
+        <span class="signer" id="pub-status"></span>
+      </div>
+      <div class="result" id="result" aria-live="polite">
+        <h2 id="result-title">Sealed.</h2>
+        <div class="seal-npub" id="seal-npub"></div>
+        <div class="relays" id="relays"></div>
+        <div class="link-box">
+          <a id="verify-link" href="#" target="_blank" rel="noopener"></a>
+          <button class="btn btn-ghost" id="copy-link" type="button" style="padding:.4em 1em;font-size:.66rem">Copy link</button>
+        </div>
+      </div>
+    </section>
+  </section>
+
+  <!-- ============ RECOVERY ============ -->
+  <section class="pane" id="pane-recovery" role="tabpanel" aria-labelledby="tab-recovery" hidden>
+    <p class="lede">
+      Practice the recovery before you ever need it. Paste any <b>k</b> officer shares below. The town
+      key is reconstructed <b>in this page</b>, its public name (npub) derived, and shown so you can
+      confirm it matches the seal on record. Nothing you paste ever leaves this device. Add the town's
+      published npub to check the match automatically.
+    </p>
+    <div class="panel">
+      <label class="fld" for="expected-npub">Town seal npub (optional, to confirm the match)</label>
+      <input type="text" id="expected-npub" placeholder="npub1…" autocomplete="off">
+
+      <label class="fld" for="shares-in" style="margin-top:1.2rem">Paste shares, one per line (k of them)</label>
+      <textarea id="shares-in" placeholder="801abc…&#10;802def…&#10;803…"></textarea>
+
+      <div class="btn-row">
+        <button class="btn" id="recover" type="button">Reconstruct the town key</button>
+        <span class="signer" id="rec-status"></span>
+      </div>
+      <div class="recover-out" id="recover-out" hidden></div>
+      <p class="note-warn">
+        Shares are combined only in this page's memory. They are never saved and never sent anywhere.
+        Reconstructing the key here reveals the full secret in memory: do it on a trusted device, and
+        reload when you are done. Gathering k shares <b>is</b> the act of the town wielding its seal.
+        Off the record, that is a breach.
+      </p>
+    </div>
+  </section>
+
+  <footer>
+    <p><a href="https://github.com/michaelditter/the-record">Open source on GitHub</a> ·
+       built for <a href="https://youcannoteat.codes">You Cannot Eat Code</a> ·
+       the oath layer, made municipal</p>
+    <p>Shamir Secret Sharing over GF(256) (secrets.js-grempe). The town key is split, never surrendered.
+       A seal is durable, not eternal: the declaration lives as long as one relay keeps a copy.</p>
+  </footer>
+</main>
+
+<!-- nostr-tools@2.23.5 vendored locally so signing never depends on a live CDN. -->
+<script src="vendor/nostr.bundle.js"></script>
+<!-- secrets.js-grempe@2.0.0 (Shamir over GF(256)); attaches window.secrets, uses crypto.getRandomValues. -->
+<script src="vendor/secrets.min.js"></script>
+<!-- record-core (the shared Civic Record Protocol core), vendored from record-core; exposed on window. -->
+<script type="module">import * as RecordCore from './vendor/record-core.mjs'; window.RecordCore = RecordCore;</script>
+<script src="seal.js"></script>
+</body>
+</html>
